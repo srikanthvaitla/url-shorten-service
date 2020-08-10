@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+
+    <Properties>
+        <Property name="log-path">./logs</Property>
+        <Property name="archive-path">./logs/archive</Property>
+    </Properties>
+
+    <Appenders>
+
+        <Console name="consoleAppender" target="SYSTEM_OUT" follow="true">
+            <PatternLayout
+                    pattern="DateTime=%d{yyyy-MM-dd HH:mm:ss:SSS z}, Type=UrlShortenService_Console Log, Thread=[%.80t], Logger=%c, Level=%p, \nMessage=[%m]%n"/>
+            <Filters>
+                <ThresholdFilter level="INFO"/>
+            </Filters>
+        </Console>
+
+        <RollingFile name="fileLogAppender"
+                     fileName="${log-path}/url-shorten-service-events.txt"
+                     filePattern="${archive-path}/url-shorten-service-events.txt.%d{yyyy-MM-dd-hh-mm}.gz">
+            <PatternLayout
+                    pattern="DateTime=%d{yyyy-MM-dd HH:mm:ss:SSS z}, Type=UrlShortenService_Events Log, Thread=[%.80t], Logger=%c, Level=%p, \nMessage=[%m]%n"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="1000KB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="100"/>
+            <Filters>
+                <ThresholdFilter level="INFO"/>
+                <ThresholdFilter level="ERROR" onMatch="DENY" onMismatch="NEUTRAL"/>
+            </Filters>
+        </RollingFile>
+
+        <RollingFile name="errorLogAppender"
+                     fileName="${log-path}/url-shorten-service-errors.txt"
+                     filePattern="${archive-path}/url-shorten-service-errors.txt.%d{yyyy-MM-dd-hh-mm}.gz">
+            <PatternLayout
+                    pattern="DateTime=%d{yyyy-MM-dd HH:mm:ss:SSS z}, Type=UrlShortenService_Error Log, Thread=[%.80t], Logger=%c, Level=%p, \nMessage=[%m]%n"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="1000KB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="100"/>
+            <Filters>
+                <ThresholdFilter level="ERROR"/>
+            </Filters>
+        </RollingFile>
+
+        <Async name="devLogAppender">
+            <AppenderRef ref="fileLogAppender" level="DEBUG"/>
+        </Async>
+        <Async name="testLogAppender">
+            <AppenderRef ref="fileLogAppender" level="INFO"/>
+        </Async>
+        <Async name="prodLogAppender">
+            <AppenderRef ref="fileLogAppender" level="INFO"/>
+        </Async>
+
+    </Appenders>
+
+    <Loggers>
+
+        <Root level="INFO">
+            <AppenderRef ref="consoleAppender"/>
+            <AppenderRef ref="errorLogAppender"/>
+            <!-- We need to supply environment value to select appropriate Async LogAppender -->
+            <!-- For time being using fileLogAppender directly here -->
+            <AppenderRef ref="fileLogAppender"/>
+        </Root>
+
+    </Loggers>
+
+</Configuration>
